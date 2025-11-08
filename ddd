@@ -1,0 +1,279 @@
+-- XENO Style Sky Changer for Roblox
+-- Автор: GitHub
+-- Описание: Меняет небо в Roblox на серое при инжекте
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+
+-- Функция для создания уведомлений
+function createNotification(title, text, duration)
+    if not _G.XENO_Notifications then
+        _G.XENO_Notifications = {}
+    end
+    
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "XENONotifications"
+    screenGui.Parent = game:GetService("CoreGui")
+    
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 300, 0, 80)
+    frame.Position = UDim2.new(1, -320, 0, 20 + (#_G.XENO_Notifications * 90))
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    frame.BorderSizePixel = 0
+    frame.Parent = screenGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = frame
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(80, 80, 80)
+    stroke.Thickness = 2
+    stroke.Parent = frame
+    
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -20, 0, 25)
+    titleLabel.Position = UDim2.new(0, 10, 0, 10)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = title
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 14
+    titleLabel.Parent = frame
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, -20, 0, 40)
+    textLabel.Position = UDim2.new(0, 10, 0, 35)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = text
+    textLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    textLabel.TextXAlignment = Enum.TextXAlignment.Left
+    textLabel.TextYAlignment = Enum.TextYAlignment.Top
+    textLabel.Font = Enum.Font.Gotham
+    textLabel.TextSize = 12
+    textLabel.TextWrapped = true
+    textLabel.Parent = frame
+    
+    table.insert(_G.XENO_Notifications, screenGui)
+    
+    -- Анимация появления
+    frame.Position = UDim2.new(1, 300, 0, frame.Position.Y.Offset)
+    local tween = TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Position = UDim2.new(1, -320, 0, frame.Position.Y.Offset)
+    })
+    tween:Play()
+    
+    -- Автоматическое закрытие
+    delay(duration, function()
+        local tweenOut = TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Position = UDim2.new(1, 300, 0, frame.Position.Y.Offset)
+        })
+        tweenOut:Play()
+        tweenOut.Completed:Wait()
+        screenGui:Destroy()
+        
+        -- Обновление позиций остальных уведомлений
+        for i, notif in ipairs(_G.XENO_Notifications) do
+            if notif == screenGui then
+                table.remove(_G.XENO_Notifications, i)
+                break
+            end
+        end
+    end)
+end
+
+-- Основная функция изменения неба
+function changeSkyToGray()
+    -- Сохраняем оригинальные настройки
+    if not _G.OriginalLightingSettings then
+        _G.OriginalLightingSettings = {
+            Sky = Lighting:FindFirstChildOfClass("Sky") and Lighting:FindFirstChildOfClass("Sky"):Clone(),
+            FogColor = Lighting.FogColor,
+            FogEnd = Lighting.FogEnd,
+            FogStart = Lighting.FogStart,
+            Ambient = Lighting.Ambient,
+            OutdoorAmbient = Lighting.OutdoorAmbient,
+            Brightness = Lighting.Brightness,
+            TimeOfDay = Lighting.TimeOfDay
+        }
+    end
+    
+    -- Удаляем существующее небо
+    local existingSky = Lighting:FindFirstChildOfClass("Sky")
+    if existingSky then
+        existingSky:Destroy()
+    end
+    
+    -- Создаем серое небо
+    local graySky = Instance.new("Sky")
+    graySky.Name = "XENOGraySky"
+    
+    -- Настройки для серого неба
+    graySky.SkyboxBk = "http://www.roblox.com/asset/?id=6774684472" -- Серый текстура
+    graySky.SkyboxDn = "http://www.roblox.com/asset/?id=6774684472"
+    graySky.SkyboxFt = "http://www.roblox.com/asset/?id=6774684472"
+    graySky.SkyboxLf = "http://www.roblox.com/asset/?id=6774684472"
+    graySky.SkyboxRt = "http://www.roblox.com/asset/?id=6774684472"
+    graySky.SkyboxUp = "http://www.roblox.com/asset/?id=6774685293" -- Светло-серый для верха
+    
+    graySky.Parent = Lighting
+    
+    -- Настройка освещения для серой атмосферы
+    Lighting.FogColor = Color3.fromRGB(100, 100, 100)
+    Lighting.FogEnd = 1000
+    Lighting.FogStart = 0
+    Lighting.Ambient = Color3.fromRGB(80, 80, 80)
+    Lighting.OutdoorAmbient = Color3.fromRGB(100, 100, 100)
+    Lighting.Brightness = 1.5
+    Lighting.TimeOfDay = "14:00:00" -- Дневное время для равномерного освещения
+    
+    createNotification("XENO SKY CHANGER", "Небо успешно изменено на серое!", 5)
+end
+
+-- Функция восстановления оригинального неба
+function restoreOriginalSky()
+    if _G.OriginalLightingSettings then
+        -- Удаляем наше небо
+        local ourSky = Lighting:FindFirstChild("XENOGraySky")
+        if ourSky then
+            ourSky:Destroy()
+        end
+        
+        -- Восстанавливаем оригинальное небо
+        if _G.OriginalLightingSettings.Sky then
+            _G.OriginalLightingSettings.Sky:Clone().Parent = Lighting
+        end
+        
+        -- Восстанавливаем настройки освещения
+        Lighting.FogColor = _G.OriginalLightingSettings.FogColor
+        Lighting.FogEnd = _G.OriginalLightingSettings.FogEnd
+        Lighting.FogStart = _G.OriginalLightingSettings.FogStart
+        Lighting.Ambient = _G.OriginalLightingSettings.Ambient
+        Lighting.OutdoorAmbient = _G.OriginalLightingSettings.OutdoorAmbient
+        Lighting.Brightness = _G.OriginalLightingSettings.Brightness
+        Lighting.TimeOfDay = _G.OriginalLightingSettings.TimeOfDay
+        
+        createNotification("XENO SKY CHANGER", "Оригинальное небо восстановлено!", 5)
+    else
+        createNotification("XENO SKY CHANGER", "Оригинальные настройки не найдены!", 5)
+    end
+end
+
+-- Создаем GUI для управления
+function createControlGUI()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "XENOSkyControl"
+    screenGui.Parent = game:GetService("CoreGui")
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 250, 0, 150)
+    mainFrame.Position = UDim2.new(0, 20, 0, 20)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = mainFrame
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(80, 80, 80)
+    stroke.Thickness = 2
+    stroke.Parent = mainFrame
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 40)
+    title.Position = UDim2.new(0, 0, 0, 0)
+    title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    title.BorderSizePixel = 0
+    title.Text = "XENO SKY CHANGER"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 16
+    title.Parent = mainFrame
+    
+    local titleCorner = Instance.new("UICorner")
+    titleCorner.CornerRadius = UDim.new(0, 8)
+    titleCorner.Parent = title
+    
+    local graySkyBtn = Instance.new("TextButton")
+    graySkyBtn.Size = UDim2.new(0.8, 0, 0, 35)
+    graySkyBtn.Position = UDim2.new(0.1, 0, 0, 50)
+    graySkyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    graySkyBtn.BorderSizePixel = 0
+    graySkyBtn.Text = "Серое Небо"
+    graySkyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    graySkyBtn.Font = Enum.Font.Gotham
+    graySkyBtn.TextSize = 14
+    graySkyBtn.Parent = mainFrame
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = graySkyBtn
+    
+    local restoreBtn = Instance.new("TextButton")
+    restoreBtn.Size = UDim2.new(0.8, 0, 0, 35)
+    restoreBtn.Position = UDim2.new(0.1, 0, 0, 95)
+    restoreBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    restoreBtn.BorderSizePixel = 0
+    restoreBtn.Text = "Восстановить"
+    restoreBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    restoreBtn.Font = Enum.Font.Gotham
+    restoreBtn.TextSize = 14
+    restoreBtn.Parent = mainFrame
+    
+    local restoreCorner = Instance.new("UICorner")
+    restoreCorner.CornerRadius = UDim.new(0, 6)
+    restoreCorner.Parent = restoreBtn
+    
+    -- Обработчики событий
+    graySkyBtn.MouseButton1Click:Connect(function()
+        changeSkyToGray()
+    end)
+    
+    restoreBtn.MouseButton1Click:Connect(function()
+        restoreOriginalSky()
+    end)
+    
+    -- Эффекты при наведении
+    graySkyBtn.MouseEnter:Connect(function()
+        graySkyBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+    
+    graySkyBtn.MouseLeave:Connect(function()
+        graySkyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    end)
+    
+    restoreBtn.MouseEnter:Connect(function()
+        restoreBtn.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+    end)
+    
+    restoreBtn.MouseLeave:Connect(function()
+        restoreBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    end)
+    
+    return screenGui
+end
+
+-- Основная функция инициализации
+function initialize()
+    createNotification("XENO SKY CHANGER", "Скрипт успешно загружен!", 3)
+    
+    wait(1)
+    
+    local controlGUI = createControlGUI()
+    
+    -- Автоматически применяем серое небо при запуске
+    changeSkyToGray()
+    
+    createNotification("XENO SKY CHANGER", "Готов к работе! Используйте панель управления.", 5)
+end
+
+-- Запуск скрипта
+if game:GetService("RunService"):IsClient() then
+    initialize()
+else
+    createNotification("Ошибка", "Скрипт должен быть запущен на клиенте!", 5)
+end
