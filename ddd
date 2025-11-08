@@ -1,6 +1,6 @@
 -- XENO Style Sky Changer for Roblox
 -- Автор: GitHub
--- Описание: Меняет небо в Roblox на серое при инжекте
+-- Описание: Меняет небо в Roblox на полностью серое при инжекте
 
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
@@ -84,66 +84,172 @@ function createNotification(title, text, duration)
     end)
 end
 
+-- Функция для создания полностью серых текстур
+function createGraySkybox()
+    -- Создаем полностью серое небо с разными оттенками серого для реалистичности
+    local graySky = Instance.new("Sky")
+    graySky.Name = "XENOCompleteGraySky"
+    
+    -- Используем чистые серые цвета вместо текстур
+    -- Для реалистичности используем разные оттенки серого
+    
+    -- Боковые стороны - темно-серый
+    local darkGray = "rbxasset://textures/sky/sky_512_cloudy.dds"
+    -- Верх - светло-серый
+    local lightGray = "rbxasset://textures/sky/sky_512_cloudy.dds"
+    
+    -- Альтернативный вариант: создаем програмmatically серые текстуры
+    graySky.SkyboxBk = "http://www.roblox.com/asset/?id=1" -- Заменитель серого
+    graySky.SkyboxDn = "http://www.roblox.com/asset/?id=1" 
+    graySky.SkyboxFt = "http://www.roblox.com/asset/?id=1"
+    graySky.SkyboxLf = "http://www.roblox.com/asset/?id=1"
+    graySky.SkyboxRt = "http://www.roblox.com/asset/?id=1"
+    graySky.SkyboxUp = "http://www.roblox.com/asset/?id=1"
+    
+    -- Настройка свойств неба
+    graySky.SunAngularSize = 0 -- Убираем солнце
+    graySky.MoonAngularSize = 0 -- Убираем луну
+    
+    return graySky
+end
+
+-- Функция для создания атмосферного эффекта
+function createAtmosphere()
+    local atmosphere = Instance.new("Atmosphere")
+    atmosphere.Name = "XENOGrayAtmosphere"
+    atmosphere.Density = 0.5
+    atmosphere.Offset = 0.25
+    atmosphere.Color = Color3.fromRGB(120, 120, 120)
+    atmosphere.Decay = Color3.fromRGB(140, 140, 140)
+    atmosphere.Glare = 0
+    atmosphere.Haze = 5
+    
+    return atmosphere
+end
+
+-- Функция для создания серых облаков
+function createGrayClouds()
+    local clouds = Instance.new("Clouds")
+    clouds.Name = "XENOGrayClouds"
+    clouds.Cover = 0.8
+    clouds.Density = 0.7
+    clouds.Color = Color3.fromRGB(150, 150, 150)
+    
+    return clouds
+end
+
 -- Основная функция изменения неба
 function changeSkyToGray()
     -- Сохраняем оригинальные настройки
     if not _G.OriginalLightingSettings then
         _G.OriginalLightingSettings = {
             Sky = Lighting:FindFirstChildOfClass("Sky") and Lighting:FindFirstChildOfClass("Sky"):Clone(),
+            Atmosphere = Lighting:FindFirstChildOfClass("Atmosphere") and Lighting:FindFirstChildOfClass("Atmosphere"):Clone(),
+            Clouds = Lighting:FindFirstChildOfClass("Clouds") and Lighting:FindFirstChildOfClass("Clouds"):Clone(),
             FogColor = Lighting.FogColor,
             FogEnd = Lighting.FogEnd,
             FogStart = Lighting.FogStart,
             Ambient = Lighting.Ambient,
             OutdoorAmbient = Lighting.OutdoorAmbient,
             Brightness = Lighting.Brightness,
-            TimeOfDay = Lighting.TimeOfDay
+            TimeOfDay = Lighting.TimeOfDay,
+            GlobalShadows = Lighting.GlobalShadows,
+            ColorShift_Bottom = Lighting.ColorShift_Bottom,
+            ColorShift_Top = Lighting.ColorShift_Top
         }
     end
     
-    -- Удаляем существующее небо
+    -- Очищаем существующие эффекты неба
     local existingSky = Lighting:FindFirstChildOfClass("Sky")
     if existingSky then
         existingSky:Destroy()
     end
     
-    -- Создаем серое небо
-    local graySky = Instance.new("Sky")
-    graySky.Name = "XENOGraySky"
+    local existingAtmosphere = Lighting:FindFirstChildOfClass("Atmosphere")
+    if existingAtmosphere then
+        existingAtmosphere:Destroy()
+    end
     
-    -- Настройки для серого неба
-    graySky.SkyboxBk = "http://www.roblox.com/asset/?id=6774684472" -- Серый текстура
-    graySky.SkyboxDn = "http://www.roblox.com/asset/?id=6774684472"
-    graySky.SkyboxFt = "http://www.roblox.com/asset/?id=6774684472"
-    graySky.SkyboxLf = "http://www.roblox.com/asset/?id=6774684472"
-    graySky.SkyboxRt = "http://www.roblox.com/asset/?id=6774684472"
-    graySky.SkyboxUp = "http://www.roblox.com/asset/?id=6774685293" -- Светло-серый для верха
+    local existingClouds = Lighting:FindFirstChildOfClass("Clouds")
+    if existingClouds then
+        existingClouds:Destroy()
+    end
     
+    -- Создаем полностью серое небо
+    local graySky = createGraySkybox()
     graySky.Parent = Lighting
     
-    -- Настройка освещения для серой атмосферы
-    Lighting.FogColor = Color3.fromRGB(100, 100, 100)
-    Lighting.FogEnd = 1000
-    Lighting.FogStart = 0
-    Lighting.Ambient = Color3.fromRGB(80, 80, 80)
-    Lighting.OutdoorAmbient = Color3.fromRGB(100, 100, 100)
-    Lighting.Brightness = 1.5
-    Lighting.TimeOfDay = "14:00:00" -- Дневное время для равномерного освещения
+    -- Создаем серую атмосферу
+    local grayAtmosphere = createAtmosphere()
+    grayAtmosphere.Parent = Lighting
     
-    createNotification("XENO SKY CHANGER", "Небо успешно изменено на серое!", 5)
+    -- Создаем серые облака
+    local grayClouds = createGrayClouds()
+    grayClouds.Parent = Lighting
+    
+    -- Комплексная настройка освещения для полностью серой атмосферы
+    Lighting.FogColor = Color3.fromRGB(90, 90, 90)        -- Серый туман
+    Lighting.FogEnd = 1500
+    Lighting.FogStart = 100
+    Lighting.Ambient = Color3.fromRGB(70, 70, 70)         -- Серое окружающее освещение
+    Lighting.OutdoorAmbient = Color3.fromRGB(90, 90, 90)  -- Серое наружное освещение
+    Lighting.Brightness = 1.2                             -- Умеренная яркость
+    Lighting.TimeOfDay = "12:00:00"                       -- Полдень для равномерного света
+    Lighting.GlobalShadows = true
+    Lighting.ColorShift_Bottom = Color3.fromRGB(100, 100, 100) -- Серый цветовой сдвиг
+    Lighting.ColorShift_Top = Color3.fromRGB(120, 120, 120)
+    
+    -- Дополнительные настройки для полного контроля
+    Lighting.ExposureCompensation = 0.1                   -- Компенсация экспозиции
+    
+    -- Убираем цветовые эффекты
+    if Lighting:FindFirstChild("ColorCorrection") then
+        Lighting.ColorCorrection:Destroy()
+    end
+    
+    if Lighting:FindFirstChild("BloomEffect") then
+        Lighting.BloomEffect:Destroy()
+    end
+    
+    if Lighting:FindFirstChild("BlurEffect") then
+        Lighting.BlurEffect:Destroy()
+    end
+    
+    createNotification("XENO SKY CHANGER", "Небо полностью изменено на серое!", 5)
 end
 
--- Функция восстановления оригинального неба
+-- Улучшенная функция восстановления оригинального неба
 function restoreOriginalSky()
     if _G.OriginalLightingSettings then
-        -- Удаляем наше небо
-        local ourSky = Lighting:FindFirstChild("XENOGraySky")
+        -- Очищаем наши эффекты
+        local ourSky = Lighting:FindFirstChild("XENOCompleteGraySky")
         if ourSky then
             ourSky:Destroy()
+        end
+        
+        local ourAtmosphere = Lighting:FindFirstChild("XENOGrayAtmosphere")
+        if ourAtmosphere then
+            ourAtmosphere:Destroy()
+        end
+        
+        local ourClouds = Lighting:FindFirstChild("XENOGrayClouds")
+        if ourClouds then
+            ourClouds:Destroy()
         end
         
         -- Восстанавливаем оригинальное небо
         if _G.OriginalLightingSettings.Sky then
             _G.OriginalLightingSettings.Sky:Clone().Parent = Lighting
+        end
+        
+        -- Восстанавливаем атмосферу
+        if _G.OriginalLightingSettings.Atmosphere then
+            _G.OriginalLightingSettings.Atmosphere:Clone().Parent = Lighting
+        end
+        
+        -- Восстанавливаем облака
+        if _G.OriginalLightingSettings.Clouds then
+            _G.OriginalLightingSettings.Clouds:Clone().Parent = Lighting
         end
         
         -- Восстанавливаем настройки освещения
@@ -154,11 +260,47 @@ function restoreOriginalSky()
         Lighting.OutdoorAmbient = _G.OriginalLightingSettings.OutdoorAmbient
         Lighting.Brightness = _G.OriginalLightingSettings.Brightness
         Lighting.TimeOfDay = _G.OriginalLightingSettings.TimeOfDay
+        Lighting.GlobalShadows = _G.OriginalLightingSettings.GlobalShadows
+        Lighting.ColorShift_Bottom = _G.OriginalLightingSettings.ColorShift_Bottom
+        Lighting.ColorShift_Top = _G.OriginalLightingSettings.ColorShift_Top
         
         createNotification("XENO SKY CHANGER", "Оригинальное небо восстановлено!", 5)
     else
         createNotification("XENO SKY CHANGER", "Оригинальные настройки не найдены!", 5)
     end
+end
+
+-- Функция для принудительного серого неба (максимальный эффект)
+function forceGraySky()
+    -- Удаляем все эффекты неба
+    for _, obj in ipairs(Lighting:GetChildren()) do
+        if obj:IsA("Sky") or obj:IsA("Atmosphere") or obj:IsA("Clouds") then
+            obj:Destroy()
+        end
+    end
+    
+    -- Устанавливаем минималистичное серое небо
+    local minimalSky = Instance.new("Sky")
+    minimalSky.Name = "XENOMinimalGraySky"
+    
+    -- Используем базовые серые текстуры
+    minimalSky.SkyboxBk = "rbxasset://textures/sky/sky_512_cloudy.dds"
+    minimalSky.SkyboxDn = "rbxasset://textures/sky/sky_512_cloudy.dds"
+    minimalSky.SkyboxFt = "rbxasset://textures/sky/sky_512_cloudy.dds"
+    minimalSky.SkyboxLf = "rbxasset://textures/sky/sky_512_cloudy.dds"
+    minimalSky.SkyboxRt = "rbxasset://textures/sky/sky_512_cloudy.dds"
+    minimalSky.SkyboxUp = "rbxasset://textures/sky/sky_512_cloudy.dds"
+    
+    minimalSky.Parent = Lighting
+    
+    -- Максимально серые настройки
+    Lighting.FogColor = Color3.fromRGB(80, 80, 80)
+    Lighting.Ambient = Color3.fromRGB(60, 60, 60)
+    Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 80)
+    Lighting.Brightness = 1.0
+    Lighting.TimeOfDay = "12:00:00"
+    
+    createNotification("XENO SKY CHANGER", "Принудительное серое небо применено!", 5)
 end
 
 -- Создаем GUI для управления
@@ -168,7 +310,7 @@ function createControlGUI()
     screenGui.Parent = game:GetService("CoreGui")
     
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0, 250, 0, 150)
+    mainFrame.Size = UDim2.new(0, 280, 0, 200)
     mainFrame.Position = UDim2.new(0, 20, 0, 20)
     mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     mainFrame.BorderSizePixel = 0
@@ -188,7 +330,7 @@ function createControlGUI()
     title.Position = UDim2.new(0, 0, 0, 0)
     title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     title.BorderSizePixel = 0
-    title.Text = "RNS sky"
+    title.Text = "XENO GRAY SKY"
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.Font = Enum.Font.GothamBold
     title.TextSize = 16
@@ -213,9 +355,24 @@ function createControlGUI()
     btnCorner.CornerRadius = UDim.new(0, 6)
     btnCorner.Parent = graySkyBtn
     
+    local forceGrayBtn = Instance.new("TextButton")
+    forceGrayBtn.Size = UDim2.new(0.8, 0, 0, 35)
+    forceGrayBtn.Position = UDim2.new(0.1, 0, 0, 95)
+    forceGrayBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    forceGrayBtn.BorderSizePixel = 0
+    forceGrayBtn.Text = "Принудительное Серое"
+    forceGrayBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    forceGrayBtn.Font = Enum.Font.Gotham
+    forceGrayBtn.TextSize = 12
+    forceGrayBtn.Parent = mainFrame
+    
+    local forceCorner = Instance.new("UICorner")
+    forceCorner.CornerRadius = UDim.new(0, 6)
+    forceCorner.Parent = forceGrayBtn
+    
     local restoreBtn = Instance.new("TextButton")
     restoreBtn.Size = UDim2.new(0.8, 0, 0, 35)
-    restoreBtn.Position = UDim2.new(0.1, 0, 0, 95)
+    restoreBtn.Position = UDim2.new(0.1, 0, 0, 140)
     restoreBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
     restoreBtn.BorderSizePixel = 0
     restoreBtn.Text = "Восстановить"
@@ -233,33 +390,35 @@ function createControlGUI()
         changeSkyToGray()
     end)
     
+    forceGrayBtn.MouseButton1Click:Connect(function()
+        forceGraySky()
+    end)
+    
     restoreBtn.MouseButton1Click:Connect(function()
         restoreOriginalSky()
     end)
     
     -- Эффекты при наведении
-    graySkyBtn.MouseEnter:Connect(function()
-        graySkyBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    end)
+    local function setupButtonHover(button, normalColor, hoverColor)
+        button.MouseEnter:Connect(function()
+            button.BackgroundColor3 = hoverColor
+        end)
+        
+        button.MouseLeave:Connect(function()
+            button.BackgroundColor3 = normalColor
+        end)
+    end
     
-    graySkyBtn.MouseLeave:Connect(function()
-        graySkyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    end)
-    
-    restoreBtn.MouseEnter:Connect(function()
-        restoreBtn.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
-    end)
-    
-    restoreBtn.MouseLeave:Connect(function()
-        restoreBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    end)
+    setupButtonHover(graySkyBtn, Color3.fromRGB(60, 60, 60), Color3.fromRGB(70, 70, 70))
+    setupButtonHover(forceGrayBtn, Color3.fromRGB(50, 50, 50), Color3.fromRGB(60, 60, 60))
+    setupButtonHover(restoreBtn, Color3.fromRGB(80, 80, 80), Color3.fromRGB(90, 90, 90))
     
     return screenGui
 end
 
 -- Основная функция инициализации
 function initialize()
-    createNotification("XENO SKY CHANGER", "Скрипт успешно загружен!", 3)
+    createNotification("XENO GRAY SKY", "Скрипт полностью серого неба загружен!", 3)
     
     wait(1)
     
@@ -268,7 +427,7 @@ function initialize()
     -- Автоматически применяем серое небо при запуске
     changeSkyToGray()
     
-    createNotification("XENO SKY CHANGER", "Готов к работе! Используйте панель управления.", 5)
+    createNotification("XENO GRAY SKY", "Готов к работе! Используйте панель управления.", 5)
 end
 
 -- Запуск скрипта
