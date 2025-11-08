@@ -330,7 +330,7 @@ function createControlGUI()
     title.Position = UDim2.new(0, 0, 0, 0)
     title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     title.BorderSizePixel = 0
-    title.Text = "XENO GRAY SKY"
+    title.Text = "RNS gray sky"
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.Font = Enum.Font.GothamBold
     title.TextSize = 16
@@ -345,7 +345,7 @@ function createControlGUI()
     graySkyBtn.Position = UDim2.new(0.1, 0, 0, 50)
     graySkyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     graySkyBtn.BorderSizePixel = 0
-    graySkyBtn.Text = "Серое Небо"
+    graySkyBtn.Text = "Gray SKY"
     graySkyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     graySkyBtn.Font = Enum.Font.Gotham
     graySkyBtn.TextSize = 14
@@ -375,7 +375,7 @@ function createControlGUI()
     restoreBtn.Position = UDim2.new(0.1, 0, 0, 140)
     restoreBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
     restoreBtn.BorderSizePixel = 0
-    restoreBtn.Text = "Восстановить"
+    restoreBtn.Text = "Restarting SKY"
     restoreBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     restoreBtn.Font = Enum.Font.Gotham
     restoreBtn.TextSize = 14
@@ -418,7 +418,7 @@ end
 
 -- Основная функция инициализации
 function initialize()
-    createNotification("XENO GRAY SKY", "Скрипт полностью серого неба загружен!", 3)
+    createNotification("RNS GRAY SKY", "Скрипт полностью серого неба загружен!", 3)
     
     wait(1)
     
