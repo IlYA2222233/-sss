@@ -34,7 +34,7 @@ function createNotification(title, text, duration)
     
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(1, -20, 0, 25)
-    titleLabel.Position = UDim2.new(0, 10, 0, 10)
+    titleLabel.Position = UDim2.new(0, 5, 0, 5)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Text = title
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -45,7 +45,7 @@ function createNotification(title, text, duration)
     
     local textLabel = Instance.new("TextLabel")
     textLabel.Size = UDim2.new(1, -20, 0, 40)
-    textLabel.Position = UDim2.new(0, 10, 0, 35)
+    textLabel.Position = UDim2.new(0, 5, 0, 30)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = text
     textLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -311,7 +311,7 @@ function createControlGUI()
     
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0, 280, 0, 200)
-    mainFrame.Position = UDim2.new(0, 20, 0, 20)
+    mainFrame.Position = UDim2.new(0, 15, 0, 15)
     mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = screenGui
@@ -342,7 +342,7 @@ function createControlGUI()
     
     local graySkyBtn = Instance.new("TextButton")
     graySkyBtn.Size = UDim2.new(0.8, 0, 0, 35)
-    graySkyBtn.Position = UDim2.new(0.1, 0, 0, 50)
+    graySkyBtn.Position = UDim2.new(0.1, 0, 0, 45)
     graySkyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     graySkyBtn.BorderSizePixel = 0
     graySkyBtn.Text = "Gray SKY"
